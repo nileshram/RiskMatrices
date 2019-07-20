@@ -8,19 +8,8 @@ Author : nish
 import pandas as pd
 from math import sqrt, pi, exp, log
 from scipy.stats import norm
-
 from pricing.dataframemodel import NormalEuroOption
 
-def NEO(c, s, x, t, r, v):
-    d = (s - x) / (v * sqrt(t))
-    
-    if c == "c":
-        price = ((v * sqrt(t)) * norm.pdf(d)) + ((s - x) * norm.cdf(d, loc=0, scale=1))
-    elif c == "p":
-        price = ((v * sqrt(t)) * norm.pdf(d)) - ((s - x) * norm.cdf(-d, loc=0, scale=1))
-    else:
-        print("unable to compute opt price")
-    return price
 
 path = "/home/nish/live_risk_matrices/se_static2.csv"
 
