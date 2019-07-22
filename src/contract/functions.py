@@ -41,16 +41,22 @@ class DateFunctions:
     def get_year_expiry(df_r):
         year = df_r["ExpiryDate"].year
         return str(year)[-2:]
-
-#aim is to build all of the expiries from
-#todays date in the format MM-YY
-#mm-yy : ex1,    
+    
     @staticmethod
-    def build_expiries(df_r):
-
+    def add_month_year(df_r):
+        mm_yy = df_r["ExpiryDate"].strftime("%m-%y")
+        return mm_yy
+    
+class Expiries:
+     
+    @staticmethod
+    def build_quarterly_expiries(df_r):
+        TODAY = datetime.datetime.now()
+        cur_month = TODAY.month
         pass
     
-now = datetime.datetime.now()
-print(now.month)
+    @staticmethod
+    def _build_date_str(dt):
+        return "-".join((str(dt.month), str(dt.year[-2:])))
 
 
