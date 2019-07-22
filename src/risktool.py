@@ -6,19 +6,14 @@ Author : nish
 
 """
 import pandas as pd
-from math import sqrt, pi, exp, log
-from scipy.stats import norm
 from pricing.dataframemodel import NormalEuroOption
+from contract.functions import DateFunctions
+from env.constant import RISK
 
 
-path = "/home/nish/live_risk_matrices/se_static2.csv"
-
-df = pd.read_csv(path)
-df = df[df["Name"] == "OEU3MC2 Dec Option"]
-df["type"] = [r[:1].lower() for r in df["PutCall"]]
-df["fut_px"] = [100.4175 for _ in df["PutCall"]]
-df["rate"] = [0 for _ in df["PutCall"]]
-df["bs_theo"] = df.apply(NormalEuroOption.price, axis=1)
-#df = df[["Theo", "bs_theo"]]
-#add new columns
+df = pd.read_csv(RISK)
+df = df[(df["Product"] == "Future") & (df["Symbol"] == "STERL")]
+df["ExpiryDate"] = pd.to_datetime(df["ExpiryDate"])
+df["MonthCode"] = df.apply(lambda x: DateFunctions.add_month_code(x), axis=1)
+df["ExpiryYear"] = df.apply(lambda x: DateFunctions.get_year_expiry(x), axis=1)
 print(df)

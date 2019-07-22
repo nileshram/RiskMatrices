@@ -6,3 +6,10 @@ Author : nish
 
 """
 
+class Specification:
+    
+    def __init__(self, spec):
+        self.spec = spec
+    
+    def is_satisfied(self):
+        return self.spec.is_satisfied()

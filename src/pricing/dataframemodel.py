@@ -7,12 +7,10 @@ Author : nish
 """
 
 from abc import ABCMeta, abstractmethod
-from math import sqrt, pi, exp, log
+from math import sqrt, exp, log
 from scipy.stats import norm
 
-class DataFramePricingModel:
-    
-    __metaclass__ = ABCMeta
+class DataFramePricingModel(metaclass=ABCMeta):
     
     def __init__(self, df):
         self._init_params(df)
@@ -43,14 +41,15 @@ class DataFramePricingModel:
     @abstractmethod
     def theta(self):
         raise NotImplementedError("Should implement theta()")
+    
+    @classmethod
+    def generate_model_obj(cls, df_r):
+        return cls(df_r)
 
     def add_model_param(self, model, param, label, df):
         if hasattr(model, param):
             model_param = getattr(model, param)
             setattr(self, label, model_param(df))
-    
-    def generate_model_obj(self):
-        pass
 
 class LeisnerBinomial(DataFramePricingModel):
     
@@ -60,18 +59,18 @@ class LeisnerBinomial(DataFramePricingModel):
     @staticmethod    
     def price():
         pass
-    
+     
     @staticmethod
     def delta():
         pass
-    
+     
     @staticmethod
     def gamma():
         pass
     @staticmethod
     def vega():
         pass
-    
+     
     @staticmethod
     def theta():
         pass
@@ -101,19 +100,29 @@ class NormalEuroOption(DataFramePricingModel):
     @staticmethod
     def delta(df_r):
         pass
-    
+     
     @staticmethod
     def gamma(df_r):
         pass
-    
+     
     @staticmethod
     def vega(df_r):
         pass
-    
+     
     @staticmethod
     def theta(df_r):
         pass
 
 class OrcNEOModel(DataFramePricingModel):
     pass
+
+
+import pandas as pd
+
+param = {"s" : [99.35, 99.56], "k" : [99, 99.5], "t" : [0.78, 0.87], 
+         "v" : [0.00556, 0.0067], "r" : [0,0]}
+df = pd.DataFrame(param, columns=param.keys())
+print(df)
+lr = LeisnerBinomial(df.iloc[0])
+print(lr.s)
 
