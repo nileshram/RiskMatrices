@@ -21,6 +21,10 @@ class DataModel:
     
     def sort_model(self, param):
         self.model.sort_values(by=param, inplace=True, ascending=True)
+    
+    def remove_params(self, *args):
+        cols = [arg for arg in args]
+        self.model.drop(columns=cols, inplace=True)
         
 class FuturesModel(DataModel):
     
@@ -34,7 +38,12 @@ class FuturesModel(DataModel):
         #Add fields
         self.add_date_codes()
         self.sort_model("ExpiryDate")
-
+        
+        #Drop non used fields
+        self.remove_params("Symbol", "Strike", "PutCall",
+                           "Name", "Delta", "Theta", "Gamma",
+                           "ActualVolatility", "ImpliedVolatility",
+                           "Vega")
         
     def _init_futures_data(self):
         self.model = self.model[(self.model["Product"] == "Future")
@@ -54,12 +63,23 @@ class OptionsModel(DataModel):
     def __init__(self):
         super(OptionsModel, self).__init__()
         self._init_options_data()
+        self.compute_theo(NormalEuroOption.price)
         
     def _init_options_data(self):
         self.model = self.model[(self.model["Product"] == "Option")
                                 & (self.model["Position"] != 0)]
-
-
+        
     
+    def compute_theo(self, opt_model):
+        self.add_model_param("bs_theo", opt_model)
+
+
+# fm = FuturesModel()
+# print(fm.model)
+
+import numpy as np
+
+fut_upper = np.linspace(-0.05, 0, 10)
+print(fut_upper)
     
     

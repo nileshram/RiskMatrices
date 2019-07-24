@@ -117,12 +117,3 @@ class OrcNEOModel(DataFramePricingModel):
     pass
 
 
-import pandas as pd
-
-param = {"s" : [99.35, 99.56], "k" : [99, 99.5], "t" : [0.78, 0.87], 
-         "v" : [0.00556, 0.0067], "r" : [0,0]}
-df = pd.DataFrame(param, columns=param.keys())
-print(df)
-lr = LeisnerBinomial(df.iloc[0])
-print(lr.s)
-
