@@ -74,12 +74,9 @@ class OptionsModel(DataModel):
         self.add_model_param("bs_theo", opt_model)
 
 
-# fm = FuturesModel()
-# print(fm.model)
+fm = FuturesModel()
+print(fm.model.iloc[0])
 
-import numpy as np
 
-fut_upper = np.linspace(-0.05, 0, 10)
-print(fut_upper)
     
     
