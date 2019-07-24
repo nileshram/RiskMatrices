@@ -6,6 +6,7 @@ Author : nish
 
 """
 import datetime
+import pandas as pd
 
 class DateFunctions:
 
@@ -47,16 +48,43 @@ class DateFunctions:
         mm_yy = df_r["ExpiryDate"].strftime("%m-%y")
         return mm_yy
     
-class Expiries:
-     
+class ContractSpecification:
+    
     @staticmethod
-    def build_quarterly_expiries(df_r):
-        TODAY = datetime.datetime.now()
-        cur_month = TODAY.month
+    def add_contract_spec(df_r):
+        if df_r["Symbol"] == "STERL":
+            return "L"
+        elif df_r["Symbol"] == "FEU3":
+            return "I"
+    
+    @staticmethod
+    def add_future_contract_name(df_r):
+        contract_year = "".join((df_r["MonthCode"], df_r["ExpiryYear"]))
+        contract_name = " ".join((df_r["PCC"], contract_year, df_r["Product"]))
+        return contract_name
+
+    @staticmethod
+    def add_option_contract_name(df_r):
         pass
     
     @staticmethod
-    def _build_date_str(dt):
-        return "-".join((str(dt.month), str(dt.year[-2:])))
+    def add_underlying_future(df_r):
+        pass
+    
+    @staticmethod
+    def gen_quarterlies(max_date):
+        q = (pd.date_range(pd.to_datetime(datetime.datetime.now().date()), 
+            pd.to_datetime(max_date) + pd.offsets.QuarterBegin(1), freq='Q')
+                           .strftime('%m-%y')
+                           .tolist())
+        expiry_index = {v : "".join(("ex",str(k))) for k, v in enumerate(q, start=1)}
+        return expiry_index
+    
+    @staticmethod
+    def add_fut_expiries(df_r):
+        exp_index = ContractSpecification.gen_quarterlies("2025-01-01")
+        return exp_index[df_r["MM-YY"]]
+    
 
 
+    
