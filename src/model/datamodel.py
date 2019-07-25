@@ -75,7 +75,7 @@ class OptionsModel(DataModel):
 
 
 fm = FuturesModel()
-print(fm.model.iloc[0])
+
 
 
     
