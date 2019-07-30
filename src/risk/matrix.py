@@ -9,7 +9,7 @@ from pricing.dataframemodel import NormalEuroOption
 class RiskMatrix:
     
     def __init__(self):
-        pass
+        self.size = 20
     
     def gen_fut_risk_matrix(self, expiry):
         pass
@@ -66,4 +66,9 @@ r = RiskMatrix()
 xx, yy = np.meshgrid(x_range, y_range)
 m_res = r.compute_fut_pl(xx, yy, model_fut)
 print(m_res)
+print("Length of pl matrix {}x{}".format(len(m_res), len(m_res)))
+
+# r2 = RiskMatrix()
+# x1, y1 = np.meshgrid(x_range, y_range)
+# m2_res = r2.compute_opt_pl(x, y, df_r)
     

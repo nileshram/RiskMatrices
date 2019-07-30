@@ -56,6 +56,22 @@ class ContractSpecification:
             return "L"
         elif df_r["Symbol"] == "FEU3":
             return "I"
+        elif df_r["Symbol"] == "OEU3":
+            return "I"
+        elif df_r["Symbol"] == "OEU3MC":
+            return "K"
+        elif df_r["Symbol"] == "OEU3MC2":
+            return "K2"
+        elif df_r["Symbol"] == "OEU3MC3":
+            return "K3"
+        elif df_r["Symbol"] == "OSTERL":
+            return "L"
+        elif df_r["Symbol"] == "OSTERLMC":
+            return "M"
+        elif df_r["Symbol"] == "OSTERLMC2":
+            return "M2"
+        elif df_r["Symbol"] == "OSTERLMC3":
+            return "M3"
     
     @staticmethod
     def add_future_contract_name(df_r):
@@ -69,7 +85,14 @@ class ContractSpecification:
     
     @staticmethod
     def add_underlying_future(df_r):
-        pass
+        if df_r["ExpiryDate"].month % 3 == 0:
+            return datetime.datetime.strftime(df_r["ExpiryDate"], "%m-%y")
+        elif df_r["ExpiryDate"].month % 3 == 1:
+            return "-".join((str(df_r["ExpiryDate"].month + 2)), 
+                            str(df_r["ExpiryDate"].year[-2:]))
+        elif df_r["ExpiryDate"].month % 3 == 2:
+            return "-".join((str(df_r["ExpiryDate"].month + 1)), 
+                            str(df_r["ExpiryDate"].year[-2:]))
     
     @staticmethod
     def gen_quarterlies(max_date):

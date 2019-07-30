@@ -7,6 +7,8 @@ import pandas as pd
 from service.file import FileManager
 from contract.functions import DateFunctions, ContractSpecification
 from pricing.dataframemodel import NormalEuroOption
+from abc import abstractmethod
+import datetime
 
 class DataModel:
     
@@ -63,6 +65,10 @@ class OptionsModel(DataModel):
     def __init__(self):
         super(OptionsModel, self).__init__()
         self._init_options_data()
+        self.convert_to_datetime("ExpiryDate")
+        
+        #add contract specs
+        self.add_product_classifier()
         self.compute_theo(NormalEuroOption.price)
         
     def _init_options_data(self):
@@ -71,11 +77,21 @@ class OptionsModel(DataModel):
         
     
     def compute_theo(self, opt_model):
-        self.add_model_param("bs_theo", opt_model)
-
+        self.add_model_param("atl_bs_theo", opt_model)
+        
+    def add_product_classifier(self):
+        self.add_model_param("MonthCode", DateFunctions.add_month_code)
+        self.add_model_param("ExpiryYear", DateFunctions.get_year_expiry)
+        self.add_model_param("MM-YY", DateFunctions.add_month_year)
+        self.add_model_param("PCC", ContractSpecification.add_contract_spec)
+        self.add_model_param("UnderlyingFuture", ContractSpecification.add_underlying_future)
+        
+    def add_futures_quarter(self):
+        pass
 
 fm = FuturesModel()
-
+op = OptionsModel()
+print(op.model)
 
 
     
