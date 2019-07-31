@@ -84,7 +84,7 @@ class OptionsModel(DataModel):
         self.add_model_param("ExpiryYear", DateFunctions.get_year_expiry)
         self.add_model_param("MM-YY", DateFunctions.add_month_year)
         self.add_model_param("PCC", ContractSpecification.add_contract_spec)
-        self.add_model_param("UnderlyingFuture", ContractSpecification.add_underlying_future)
+        self.add_model_param("UnderlyingFutureMM-YY", ContractSpecification.add_underlying_future)
         
     def add_futures_quarter(self):
         pass
@@ -93,6 +93,4 @@ fm = FuturesModel()
 op = OptionsModel()
 print(op.model)
 
-
-    
     
