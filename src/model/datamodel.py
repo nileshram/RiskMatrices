@@ -9,6 +9,8 @@ from contract.functions import DateFunctions, ContractSpecification
 from pricing.dataframemodel import NormalEuroOption
 from abc import abstractmethod
 
+#global
+pd.options.display.float_format = '{:2,.6f}'.format
 
 class DataModel:
     
@@ -30,6 +32,9 @@ class DataModel:
     
     def rename_param(self, old_param, new_param):
         self.model.rename(columns={old_param : new_param}, inplace=True)
+    
+    def add_config_contract_spec(self, new_param_name, param, c):
+        self.model[new_param_name] = self.model["ProductName"].map(c["contract_spec"][param])
         
 class FuturesModel(DataModel):
     
@@ -63,6 +68,7 @@ class FuturesModel(DataModel):
         self.add_model_param("UnderlyingFutureMM-YY", DateFunctions.add_mm_yy)
         self.add_model_param("UnderlyingFuturePCC", ContractSpecification.add_contract_spec)
         self.add_model_param("FutureContract", ContractSpecification.add_future_contract_name)
+        self.add_model_param("ProductName", ContractSpecification.add_product)
         self.add_model_param("ExpiryIndex", ContractSpecification.add_fut_expiries)
         
 class OptionsModel(DataModel):
@@ -72,13 +78,11 @@ class OptionsModel(DataModel):
         self._init_options_data()
         
         #add contract specs
-        
         self.add_product_classifier()
-        
         
         #Drop non used fields
         self.remove_params("Name", "Delta", "Theta", "Gamma", "Vega",
-                           "ActualVolatility")
+                           "ImpliedVolatility")
         
         self._init_futures_model()
         self.add_futures_model()
@@ -92,6 +96,8 @@ class OptionsModel(DataModel):
         self.fut_model = FuturesModel()
         
     def compute_theo(self, opt_model):
+        self.model = self.model.assign(rate=0) #default rate = 0 for BS pricing
+        self.model.round({"Theo": 5}) #Round existing theo 6dp
         self.add_model_param("atl_bs_theo", opt_model)
         
     def add_product_classifier(self):
@@ -100,10 +106,10 @@ class OptionsModel(DataModel):
         self.add_model_param("ExpiryYear", DateFunctions.get_year_expiry)
         self.add_model_param("PCC", ContractSpecification.add_contract_spec)
         
-        
         self.add_model_param("UnderlyingFutureMonthCode", DateFunctions.add_underlying_future_month_code)
         self.add_model_param("UnderlyingFutureYY", ContractSpecification.add_underling_future_expiry_year)
         self.add_model_param("UnderlyingFuturePCC", ContractSpecification.add_underlying_contract_spec)
+        self.add_model_param("ProductName", ContractSpecification.add_product)
         self.add_model_param("ContractName", ContractSpecification.add_option_contract_name)
 
         
@@ -120,7 +126,7 @@ class OptionsModel(DataModel):
                                                                 how="left")
 
 fm = FuturesModel()
-op = OptionsModel()
-print(op.model)
+# op = OptionsModel()
+# print(op.model)
 
     

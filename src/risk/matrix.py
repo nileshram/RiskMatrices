@@ -5,11 +5,43 @@ Created on 24 Jul 2019
 '''
 import numpy as np
 from pricing.dataframemodel import NormalEuroOption
+from model.datamodel import OptionsModel, FuturesModel
+from configuration import ConfigurationFactory
 
 class RiskMatrix:
     
     def __init__(self):
         self.size = 20
+        self._init_config()
+        self._init_fut_model()
+        self._init_opt_model()
+        
+        #init_params
+        self._add_model_config_params()
+        
+    def _init_config(self):
+        self.config = ConfigurationFactory.create_config()
+    
+    def _init_fut_model(self):
+        self.fut_model = FuturesModel()
+    
+    def _init_opt_model(self):
+        self.opt_model = OptionsModel().model
+    
+    def _add_model_config_params(self):
+        self.fut_model.add_config_contract_spec("Multiplier", "multiplier",
+                                                self.config)
+        self.fut_model.add_config_contract_spec("TickValue", "tick_value",
+                                                self.config)
+        self.opt_model.add_config_contract_spec("Multiplier", "multiplier",
+                                                self.config)
+        self.opt_model.add_config_contract_spec("TickValue", "tick_value",
+                                                self.config)
+    def _add_model_shocks(self, scenario, param, new_name):
+        pass
+    
+    def run_model_shocks(self, scenario):
+        pass
     
     def gen_fut_risk_matrix(self, expiry):
         pass

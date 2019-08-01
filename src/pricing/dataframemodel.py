@@ -86,15 +86,21 @@ class NormalEuroOption(DataFramePricingModel):
     
     @staticmethod    
     def price(df_r):
-        d1 = (log(df_r["fut_px"] / df_r["Strike"]) + (df_r["rate"] + (df_r["ActualVolatility"]**2)/2) * df_r["TimeToExpiry"]) / (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
-        d2 = d1 - (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
-        
-        if df_r["type"] == "c":
-            bs = (df_r["fut_px"] * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
-        elif df_r["type"] == "p":
-            bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (df_r["fut_px"] * norm.cdf(-d1))
+        try:
+            d1 = (log(df_r["FuturesPrice"] / df_r["Strike"]) + (df_r["rate"] + (df_r["ActualVolatility"]**2)/2) * df_r["TimeToExpiry"]) / (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
+            d2 = d1 - (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
+        except ZeroDivisionError:
+            print("Error computing option price for {}".format(df_r["ContractName"]))
+            d1 = 0
+            d2 = 0
+        if df_r["PutCall"] == "Call":
+            bs = (df_r["FuturesPrice"] * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
+        elif df_r["PutCall"] == "Put":
+            bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (df_r["FuturesPrice"] * norm.cdf(-d1))
         else:
             print("N/A")
+        if bs < 0:
+            bs = 0
         return bs
     
     @staticmethod

@@ -161,7 +161,12 @@ class ContractSpecification:
         expiry_index = {v : "".join(("ex",str(k))) for k, v in enumerate(q, start=1)}
         return expiry_index
     
-
+    @staticmethod
+    def add_product(df_r):
+        if df_r["UnderlyingFuturePCC"] == "L":
+            return "sterling"
+        elif df_r["UnderlyingFuturePCC"] == "I":
+            return "euribor"
     
     @staticmethod
     def add_fut_expiries(df_r):
