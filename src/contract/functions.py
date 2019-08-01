@@ -7,6 +7,7 @@ Author : nish
 """
 import datetime
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 class DateFunctions:
 
@@ -37,16 +38,43 @@ class DateFunctions:
             return "X"
         elif mth == 12:
             return "Z"
-
+    
+    @staticmethod
+    def add_underlying_future_month_code(df_r):
+        mth = df_r["ExpiryDate"].month
+        if mth  == 1:
+            return "H"
+        elif mth == 2:
+            return "H"
+        elif mth == 3:
+            return "H"
+        elif mth == 4:
+            return "M"
+        elif mth == 5:
+            return "M"
+        elif mth == 6:
+            return "M"
+        elif mth == 7:
+            return "U"
+        elif mth == 8:
+            return "U"
+        elif mth == 9:
+            return "U"
+        elif mth == 10:
+            return "Z"
+        elif mth == 11:
+            return "Z"
+        elif mth == 12:
+            return "Z"
+        
     @staticmethod
     def get_year_expiry(df_r):
         year = df_r["ExpiryDate"].year
         return str(year)[-2:]
-    
+
     @staticmethod
-    def add_month_year(df_r):
-        mm_yy = df_r["ExpiryDate"].strftime("%m-%y")
-        return mm_yy
+    def add_mm_yy(df_r):
+        return datetime.datetime.strftime(df_r["ExpiryDate"], "%m-%y")
     
 class ContractSpecification:
     
@@ -72,28 +100,58 @@ class ContractSpecification:
             return "M2"
         elif df_r["Symbol"] == "OSTERLMC3":
             return "M3"
+        
+    @staticmethod   
+    def add_underlying_contract_spec(df_r):
+        if df_r["Symbol"] == "STERL":
+            return "L"
+        elif df_r["Symbol"] == "OSTERL":
+            return "L"
+        elif df_r["Symbol"] == "OSTERLMC":
+            return "L"
+        elif df_r["Symbol"] == "OSTERLMC2":
+            return "L"
+        elif df_r["Symbol"] == "OSTERLMC3":
+            return "L"
+        elif df_r["Symbol"] == "FEU3":
+            return "I"
+        elif df_r["Symbol"] == "OEU3":
+            return "I"
+        elif df_r["Symbol"] == "OEU3MC":
+            return "I"
+        elif df_r["Symbol"] == "OEU3MC2":
+            return "I"
+        elif df_r["Symbol"] == "OEU3MC3":
+            return "I"
+
     
     @staticmethod
     def add_future_contract_name(df_r):
-        contract_year = "".join((df_r["MonthCode"], df_r["ExpiryYear"]))
-        contract_name = " ".join((df_r["PCC"], contract_year, df_r["Product"]))
+        contract_year = "".join((df_r["UnderlyingFutureMonthCode"], df_r["UnderlyingFutureYY"]))
+        contract_name = " ".join((df_r["UnderlyingFuturePCC"], contract_year, df_r["Product"]))
         return contract_name
 
     @staticmethod
     def add_option_contract_name(df_r):
-        pass
+        contract_year = "".join((df_r["MonthCode"], df_r["ExpiryYear"]))
+        contract_kind = "".join((str(df_r["Strike"]), df_r["PutCall"][0]))
+        contract_name = " ".join((df_r["PCC"], contract_year, contract_kind))
+        return contract_name
     
     @staticmethod
-    def add_underlying_future(df_r):
-        if df_r["ExpiryDate"].month % 3 == 0:
-            return datetime.datetime.strftime(df_r["ExpiryDate"], "%m-%y")
-        elif df_r["ExpiryDate"].month % 3 == 1:
-            return "-".join((str(df_r["ExpiryDate"].month + 2), 
-                            str(df_r["ExpiryDate"].year)[-2:]))
-        elif df_r["ExpiryDate"].month % 3 == 2:
-            return "-".join((str(df_r["ExpiryDate"].month + 1), 
-                            str(df_r["ExpiryDate"].year)[-2:]))
-    
+    def add_underling_future_expiry_year(df_r):
+        if df_r["PCC"] in ["L", "I"]:
+            return datetime.datetime.strftime(df_r["ExpiryDate"], "%y")
+        elif df_r["PCC"] in ["M", "K"]:
+            return datetime.datetime.strftime(df_r["ExpiryDate"] + relativedelta(years=1),
+                                              "%y")
+        elif df_r["PCC"] in ["M2", "K2"]:
+            return datetime.datetime.strftime(df_r["ExpiryDate"] + relativedelta(years=2),
+                                              "%y")
+        elif df_r["PCC"] in ["M3", "K3"]:
+            return datetime.datetime.strftime(df_r["ExpiryDate"] + relativedelta(years=3),
+                                              "%y")
+                
     @staticmethod
     def gen_quarterlies(max_date):
         q = (pd.date_range(pd.to_datetime(datetime.datetime.now().date()), 
@@ -103,10 +161,12 @@ class ContractSpecification:
         expiry_index = {v : "".join(("ex",str(k))) for k, v in enumerate(q, start=1)}
         return expiry_index
     
+
+    
     @staticmethod
     def add_fut_expiries(df_r):
         exp_index = ContractSpecification.gen_quarterlies("2025-01-01")
-        return exp_index[df_r["MM-YY"]]
+        return exp_index[df_r["UnderlyingFutureMM-YY"]]
     
 
 

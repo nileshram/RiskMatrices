@@ -6,6 +6,6 @@ Author : nish
 
 """
 
-RISK = "/home/nish/workspace/RiskMatrices/docs/ice_result_set.csv"
-CONFIG = "/home/nish/workspace/RiskMatrices/conf/config.json"
+RISK = "/home/nish/workspace/LiveRiskMatrices/docs/ice_result_set.csv"
+CONFIG = "/home/nish/workspace/LiveRiskMatrices/conf/config.json"
 
