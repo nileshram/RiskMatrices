@@ -44,7 +44,7 @@ class RiskMatrix:
         self.shock_model = self.opt_model
         #drop the unused expiries
         print("missing data {}".format(self.shock_model.model[self.shock_model.model.isnull().any(axis=1)]))
-        self.shock_model.model.dropna(inplace=True, axis=1)
+        self.shock_model.model.dropna(inplace=True)
         self.shock_model.model = self.shock_model.model[self.shock_model.model["ProductName"] == product]
         self.shock_model._add_config_model_shocks(config, scenario)
     
