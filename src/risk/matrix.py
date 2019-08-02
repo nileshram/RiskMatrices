@@ -16,6 +16,8 @@ class RiskMatrix:
         self._init_fut_model()
         self._init_opt_model()
         
+        #add model shocks
+        self.add_model_shocks(self.config, "ECB", "euribor")
         #init_params
         self._add_model_config_params()
         
@@ -26,19 +28,22 @@ class RiskMatrix:
         self.fut_model = FuturesModel()
     
     def _init_opt_model(self):
-        self.opt_model = OptionsModel().model
+        self.opt_model = OptionsModel()
     
     def _add_model_config_params(self):
         self.fut_model.add_config_contract_spec("Multiplier", "multiplier",
                                                 self.config)
         self.fut_model.add_config_contract_spec("TickValue", "tick_value",
                                                 self.config)
-        self.opt_model.add_config_contract_spec("Multiplier", "multiplier",
+        self.opt_model.model.add_config_contract_spec("Multiplier", "multiplier",
                                                 self.config)
-        self.opt_model.add_config_contract_spec("TickValue", "tick_value",
+        self.opt_model.model.add_config_contract_spec("TickValue", "tick_value",
                                                 self.config)
-    def _add_model_shocks(self, scenario, param, new_name):
-        pass
+        
+    def add_model_shocks(self, config, scenario, product):
+        self.shock_model = self.opt_model
+        self.shock_model.model = self.shock_model.model[self.shock_model.model["ProductName"] == product]
+        self.shock_model._add_config_model_shocks(config, scenario)
     
     def run_model_shocks(self, scenario):
         pass

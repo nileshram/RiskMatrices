@@ -8,6 +8,7 @@ Author : nish
 import datetime
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from google.protobuf.internal.python_message import _AddStaticMethods
 
 class DateFunctions:
 
@@ -173,6 +174,19 @@ class ContractSpecification:
         exp_index = ContractSpecification.gen_quarterlies("2025-01-01")
         return exp_index[df_r["UnderlyingFutureMM-YY"]]
     
+    @staticmethod
+    def add_fut_shock_upper(df_r, config, scenario):
+        return config["product"][df_r["ProductName"]]["scenario"][scenario]["fut"]["up"][df_r["ExpiryIndex"]]
 
+    @staticmethod
+    def add_fut_shock_lower(df_r, config, scenario):
+        return config["product"][df_r["ProductName"]]["scenario"][scenario]["fut"]["down"][df_r["ExpiryIndex"]]
 
+    @staticmethod
+    def add_vol_shock_upper(df_r, config, scenario):
+        return config["product"][df_r["ProductName"]]["scenario"][scenario]["vol"]["up"][df_r["ExpiryIndex"]]
+
+    @staticmethod
+    def add_vol_shock_lower(df_r, config, scenario):
+        return config["product"][df_r["ProductName"]]["scenario"][scenario]["vol"]["down"][df_r["ExpiryIndex"]]
     

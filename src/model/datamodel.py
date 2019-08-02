@@ -17,9 +17,12 @@ class DataModel:
     def __init__(self):
         self.model = FileManager.get_csv_data()
     
-    def add_model_param(self, param, function):
-        self.model[param] = self.model.apply(lambda x: function(x), axis=1)
-    
+    def add_model_param(self, param, function, args=None):
+        if args is None:
+            self.model[param] = self.model.apply(lambda x: function(x), axis=1)
+        else:
+            self.model[param] = self.model.apply(function, args=args, axis=1)
+            
     def convert_to_datetime(self, param):
         self.model[param] = pd.to_datetime(self.model[param])
     
@@ -125,8 +128,18 @@ class OptionsModel(DataModel):
                                                                 "UnderlyingFutureYY"],
                                                                 how="left")
 
+    def _add_config_model_shocks(self, config, scenario):
+        self.add_model_param("fut_shock_upper", ContractSpecification.add_fut_shock_upper,
+                                   args=(config, scenario))
+        self.add_model_param("fut_shock_lower", ContractSpecification.add_fut_shock_lower,
+                                   args=(config, scenario))
+        self.add_model_param("vol_shock_upper", ContractSpecification.add_vol_shock_upper,
+                                   args=(config, scenario))
+        self.add_model_param("vol_shock_lower", ContractSpecification.add_vol_shock_lower,
+                                   args=(config, scenario))
+
 fm = FuturesModel()
-# op = OptionsModel()
+op = OptionsModel()
 # print(op.model)
 
     
