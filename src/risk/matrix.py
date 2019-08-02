@@ -42,6 +42,9 @@ class RiskMatrix:
         
     def add_model_shocks(self, config, scenario, product):
         self.shock_model = self.opt_model
+        #drop the unused expiries
+        print("missing data {}".format(self.shock_model.model[self.shock_model.model.isnull().any(axis=1)]))
+        self.shock_model.model.dropna(inplace=True, axis=1)
         self.shock_model.model = self.shock_model.model[self.shock_model.model["ProductName"] == product]
         self.shock_model._add_config_model_shocks(config, scenario)
     
@@ -93,8 +96,8 @@ model_fut = fm.model
 model_fut["TickValue"] = 25
 model_fut["Multiplier"] = 1000
 model_fut = model_fut.iloc[0]
-
-
+ 
+ 
 print(x_range)
 print(y_range)
 print(model_fut)

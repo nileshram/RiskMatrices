@@ -176,17 +176,17 @@ class ContractSpecification:
     
     @staticmethod
     def add_fut_shock_upper(df_r, config, scenario):
-        return config["product"][df_r["ProductName"]]["scenario"][scenario]["fut"]["up"][df_r["ExpiryIndex"]]
+        return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["fut"]["up"][df_r["ExpiryIndex"]]
 
     @staticmethod
     def add_fut_shock_lower(df_r, config, scenario):
-        return config["product"][df_r["ProductName"]]["scenario"][scenario]["fut"]["down"][df_r["ExpiryIndex"]]
+        return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["fut"]["down"][df_r["ExpiryIndex"]]
 
     @staticmethod
     def add_vol_shock_upper(df_r, config, scenario):
-        return config["product"][df_r["ProductName"]]["scenario"][scenario]["vol"]["up"][df_r["ExpiryIndex"]]
+        return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["vol"]["up"][df_r["ExpiryIndex"]]
 
     @staticmethod
     def add_vol_shock_lower(df_r, config, scenario):
-        return config["product"][df_r["ProductName"]]["scenario"][scenario]["vol"]["down"][df_r["ExpiryIndex"]]
+        return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["vol"]["down"][df_r["ExpiryIndex"]]
     
