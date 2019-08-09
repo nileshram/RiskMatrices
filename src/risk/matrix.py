@@ -7,6 +7,7 @@ import numpy as np
 from pricing.dataframemodel import NormalEuroOption
 from model.datamodel import OptionsModel, FuturesModel
 from configuration import ConfigurationFactory
+import sys
 
 class RiskMatrix:
     
@@ -19,7 +20,7 @@ class RiskMatrix:
         #add model shocks
         self.add_model_shocks(self.config, "ECB", "euribor")
         #init_params
-        self._add_model_config_params()
+        self.add_model_config_params()
         
     def _init_config(self):
         self.config = ConfigurationFactory.create_config()
@@ -30,14 +31,14 @@ class RiskMatrix:
     def _init_opt_model(self):
         self.opt_model = OptionsModel()
     
-    def _add_model_config_params(self):
+    def add_model_config_params(self):
         self.fut_model.add_config_contract_spec("Multiplier", "multiplier",
                                                 self.config)
         self.fut_model.add_config_contract_spec("TickValue", "tick_value",
                                                 self.config)
-        self.opt_model.model.add_config_contract_spec("Multiplier", "multiplier",
+        self.shock_model.add_config_contract_spec("Multiplier", "multiplier",
                                                 self.config)
-        self.opt_model.model.add_config_contract_spec("TickValue", "tick_value",
+        self.shock_model.add_config_contract_spec("TickValue", "tick_value",
                                                 self.config)
         
     def add_model_shocks(self, config, scenario, product):

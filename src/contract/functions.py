@@ -189,4 +189,33 @@ class ContractSpecification:
     @staticmethod
     def add_vol_shock_lower(df_r, config, scenario):
         return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["vol"]["down"][df_r["ExpiryIndex"]]
+
+class RiskArray:
     
+    @staticmethod
+    def gen_upper_fut_array(df_r):
+        pass
+
+    @staticmethod
+    def gen_upper_vol_array(df_r):
+        pass
+
+    @staticmethod
+    def gen_lower_fut_array(df_r):
+        pass
+
+    @staticmethod
+    def gen_lower_vol_array(df_r):
+        pass
+    
+    @staticmethod
+    def gen_fut_array(df_r):
+        pass
+    
+    @staticmethod
+    def gen_vol_array(df_r):
+        pass
+    
+    @staticmethod
+    def merge_array(df_r):
+        pass
