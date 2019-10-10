@@ -55,6 +55,9 @@ class RiskModel:
         self.shock_model.fut_model.model = self.shock_model.fut_model.model[self.shock_model.fut_model.model["ProductName"] == product]
         self.shock_model._add_config_model_shocks(config, scenario)
         self.shock_model.fut_model._add_config_model_shocks(config, scenario)
+        #reindex futures and shock model
+        self.shock_model.model.reset_index(inplace=True)
+        self.shock_model.fut_model.model.reset_index(inplace=True)
     
     def compute_opt_pl(self, fut_arr, vol_arr, df_r):
         # Define vectorised option parameters here:
@@ -109,7 +112,7 @@ class RiskModel:
         try:
             current_vol_level = opt["ActualVolatility"]
         except TypeError:
-            print("Could not generate matrix for the following {}".format(opt))
+            return np.linspace(0, 0, size_adj)
         upper_vol_level = (1 + opt["vol_shock_upper"]) * opt["ActualVolatility"] 
         return np.linspace(current_vol_level, upper_vol_level, size_adj)
     
@@ -118,7 +121,7 @@ class RiskModel:
         try:
             current_vol_level = opt["ActualVolatility"]
         except TypeError:
-            print("Could not generate matrix for the following {}".format(opt))
+            return np.linspace(0, 0, size_adj)
         lower_vol_level = (1 + opt["vol_shock_lower"]) * opt["ActualVolatility"] 
         return np.linspace(lower_vol_level, current_vol_level, size_adj)
     
@@ -162,13 +165,14 @@ class RiskEngine:
         return sum_matrix
 
     def plot_heatmap(self, graph_model):
+        self.size = 12
         fig, ax = plt.subplots()
         cm = mplc.LinearSegmentedColormap.from_list("", ["red","white","green"])
         im = ax.imshow(graph_model, cmap=cm)
         
         # Display all of the ticks
-        ax.set_xticks(np.arange(len(self.size)))
-        ax.set_yticks(np.arange(len(self.size)))
+        ax.set_xticks(np.arange(self.size))
+        ax.set_yticks(np.arange(self.size))
         # Label each of the x/y tick labels
 #         ax.set_xticklabels(np.around(fut_arr[0], decimals=3))
 #         ax.set_yticklabels(np.around(vol_arr[:,0], decimals=3))
@@ -179,8 +183,8 @@ class RiskEngine:
         plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                  rotation_mode="anchor")
         # Loop over data dimensions and create text annotations.
-        for i in range(len(self.size)):
-            for j in range(len(self.size)):
+        for i in range(self.size):
+            for j in range(self.size):
                 text = ax.text(j, i, graph_model[i, j],
                                ha="center", va="center", color="black")
         ax.set_title("P&L Portfolio Heatmap")
