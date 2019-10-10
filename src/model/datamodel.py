@@ -136,8 +136,5 @@ class OptionsModel(DataModel):
                                                                 "UnderlyingFutureYY"],
                                                                 how="left")
 
-fm = FuturesModel()
-op = OptionsModel()
-# print(op.model)
 
     
