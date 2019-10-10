@@ -16,4 +16,4 @@ class ConfigurationFactory:
                 config_file = json.load(config)
         except IOError:
             print("Error with config filename/location please check the constant.py file")
-        return config_file         
+        return config_file      

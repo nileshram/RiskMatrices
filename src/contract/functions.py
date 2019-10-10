@@ -189,6 +189,18 @@ class ContractSpecification:
     @staticmethod
     def add_vol_shock_lower(df_r, config, scenario):
         return config["product"][df_r["ProductName"]]["shocks"]["scenario"][scenario]["vol"]["down"][df_r["ExpiryIndex"]]
+    
+    @staticmethod
+    def add_tick_value(df_r):
+        if df_r["ProductName"] == "sterling":
+            return 12.5
+        elif df_r["ProductName"] == "euribor":
+            return 25
+    
+    @staticmethod
+    def add_multiplier(df_r):
+        if df_r["Product"] in ["Option", "Future"]:
+            return 1000
 
 class RiskArray:
     

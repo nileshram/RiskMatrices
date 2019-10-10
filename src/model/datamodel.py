@@ -7,7 +7,6 @@ import pandas as pd
 from service.file import FileManager
 from contract.functions import DateFunctions, ContractSpecification
 from pricing.dataframemodel import NormalEuroOption
-from abc import abstractmethod
 
 #global
 pd.options.display.float_format = '{:2,.6f}'.format
@@ -38,6 +37,16 @@ class DataModel:
     
     def add_config_contract_spec(self, new_param_name, param, c):
         self.model[new_param_name] = self.model["ProductName"].map(c["contract_spec"][param])
+
+    def _add_config_model_shocks(self, config, scenario):
+        self.add_model_param("fut_shock_upper", ContractSpecification.add_fut_shock_upper,
+                                   args=(config, scenario))
+        self.add_model_param("fut_shock_lower", ContractSpecification.add_fut_shock_lower,
+                                   args=(config, scenario))
+        self.add_model_param("vol_shock_upper", ContractSpecification.add_vol_shock_upper,
+                                   args=(config, scenario))
+        self.add_model_param("vol_shock_lower", ContractSpecification.add_vol_shock_lower,
+                                   args=(config, scenario))
         
 class FuturesModel(DataModel):
     
@@ -73,7 +82,7 @@ class FuturesModel(DataModel):
         self.add_model_param("FutureContract", ContractSpecification.add_future_contract_name)
         self.add_model_param("ProductName", ContractSpecification.add_product)
         self.add_model_param("ExpiryIndex", ContractSpecification.add_fut_expiries)
-        
+         
 class OptionsModel(DataModel):
     
     def __init__(self):
@@ -114,7 +123,6 @@ class OptionsModel(DataModel):
         self.add_model_param("UnderlyingFuturePCC", ContractSpecification.add_underlying_contract_spec)
         self.add_model_param("ProductName", ContractSpecification.add_product)
         self.add_model_param("ContractName", ContractSpecification.add_option_contract_name)
-
         
     def add_futures_model(self):
         self.model = pd.merge(self.model, self.fut_model.model[["UnderlyingFutureMonthCode",
@@ -127,16 +135,6 @@ class OptionsModel(DataModel):
                                                                 "UnderlyingFuturePCC", 
                                                                 "UnderlyingFutureYY"],
                                                                 how="left")
-
-    def _add_config_model_shocks(self, config, scenario):
-        self.add_model_param("fut_shock_upper", ContractSpecification.add_fut_shock_upper,
-                                   args=(config, scenario))
-        self.add_model_param("fut_shock_lower", ContractSpecification.add_fut_shock_lower,
-                                   args=(config, scenario))
-        self.add_model_param("vol_shock_upper", ContractSpecification.add_vol_shock_upper,
-                                   args=(config, scenario))
-        self.add_model_param("vol_shock_lower", ContractSpecification.add_vol_shock_lower,
-                                   args=(config, scenario))
 
 fm = FuturesModel()
 op = OptionsModel()
