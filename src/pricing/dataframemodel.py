@@ -105,11 +105,12 @@ class NormalEuroOption(DataFramePricingModel):
         return bs
 
     @staticmethod    
-    def array_pricer(strike=None, time_to_expiry=None, rate=None, opt_type=None, fut_arr=None, vol_arr=None):
+    def array_pricer(strike=None, time_to_expiry=None, rate=None, opt_type=None, fut_arr=None, vol_arr=None, c_name=None):
         try:
             d1 = (np.log(fut_arr / strike) + (rate + (vol_arr**2)/2) * time_to_expiry) / (vol_arr * sqrt(time_to_expiry))
             d2 = d1 - (vol_arr * sqrt(time_to_expiry))
-        except ZeroDivisionError:
+        except (ZeroDivisionError, TypeError, RuntimeWarning) as e:
+            print("Encountered exception {} for contract {}".format(e, c_name))
             return 0
         if opt_type == "Call":
             bs = (fut_arr * norm.cdf(d1)) - (strike * exp(-rate * time_to_expiry) * norm.cdf(d2))
