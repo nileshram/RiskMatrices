@@ -10,6 +10,8 @@ from abc import ABCMeta, abstractmethod
 from math import sqrt, exp, log
 from scipy.stats import norm
 import numpy as np
+import logging
+logger = logging.getLogger("risk_matrix_log")
 
 class DataFramePricingModel(metaclass=ABCMeta):
     
@@ -92,14 +94,14 @@ class NormalEuroOption(DataFramePricingModel):
             d1 = (log(df_r["FuturesPrice"] / df_r["Strike"]) + (df_r["rate"] + (df_r["ActualVolatility"]**2)/2) * df_r["TimeToExpiry"]) / (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
             d2 = d1 - (df_r["ActualVolatility"] * sqrt(df_r["TimeToExpiry"]))
         except ZeroDivisionError:
-            print("Error computing option price for {}".format(df_r["ContractName"]))
+            logger.info("Error computing option price for {}".format(df_r["ContractName"]))
             return 0
         if df_r["PutCall"] == "Call":
             bs = (df_r["FuturesPrice"] * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
         elif df_r["PutCall"] == "Put":
             bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (df_r["FuturesPrice"] * norm.cdf(-d1))
         else:
-            print("N/A")
+            logger.info("N/A")
 #         if bs < 0:
 #             bs = 0
         return bs
@@ -110,7 +112,7 @@ class NormalEuroOption(DataFramePricingModel):
             d1 = (np.log(fut_arr / strike) + (rate + (vol_arr**2)/2) * time_to_expiry) / (vol_arr * sqrt(time_to_expiry))
             d2 = d1 - (vol_arr * sqrt(time_to_expiry))
         except (ZeroDivisionError, TypeError, RuntimeWarning) as e:
-            print("Encountered exception {} for contract {}".format(e, c_name))
+            logger.info("Encountered exception {} for contract {}".format(e, c_name))
             return 0
         if opt_type == "Call":
             bs = (fut_arr * norm.cdf(d1)) - (strike * exp(-rate * time_to_expiry) * norm.cdf(d2))
@@ -118,8 +120,6 @@ class NormalEuroOption(DataFramePricingModel):
             bs = (strike * exp(-rate * time_to_expiry) * norm.cdf(-d2)) - (fut_arr * norm.cdf(-d1))
         else:
             print("Invalid option type specified please check if calls or puts")
-#         if bs < 0:
-#             bs = 0
         return bs
     
     @staticmethod
