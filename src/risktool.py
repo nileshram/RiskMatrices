@@ -23,5 +23,8 @@ if __name__ == "__main__":
     _configure_log()
     log = logging.getLogger("risk_matrix_log")
     log.info("Initialising Program For Risk Matrix Computation")
-    risk_engine = RiskEngine()
-    risk_engine.run_pricing()
+    try:
+        risk_engine = RiskEngine()
+        risk_engine.run_pricing()
+    except Exception as e:
+        print(e)
