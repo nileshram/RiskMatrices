@@ -8,7 +8,7 @@ Author : nish
 import datetime
 import pandas as pd
 from dateutil.relativedelta import relativedelta
-from google.protobuf.internal.python_message import _AddStaticMethods
+import logging
 
 class DateFunctions:
 
@@ -201,33 +201,3 @@ class ContractSpecification:
     def add_multiplier(df_r):
         if df_r["Product"] in ["Option", "Future"]:
             return 1000
-
-class RiskArray:
-    
-    @staticmethod
-    def gen_upper_fut_array(df_r):
-        pass
-
-    @staticmethod
-    def gen_upper_vol_array(df_r):
-        pass
-
-    @staticmethod
-    def gen_lower_fut_array(df_r):
-        pass
-
-    @staticmethod
-    def gen_lower_vol_array(df_r):
-        pass
-    
-    @staticmethod
-    def gen_fut_array(df_r):
-        pass
-    
-    @staticmethod
-    def gen_vol_array(df_r):
-        pass
-    
-    @staticmethod
-    def merge_array(df_r):
-        pass

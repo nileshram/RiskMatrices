@@ -1,0 +1,30 @@
+{
+	"log": {
+		"version": 1,
+		"disable_existing_loggers": true,
+		"formatters": {
+			"risk_matrix_formatter": {
+				"format": "%(asctime)s - %(levelname)s : %(message)s",
+				"datefmt": "%Y%m%d %H:%M:%S"
+			}
+		},
+		"handlers": {
+			"consolehandler": {
+				"class": "logging.StreamHandler",
+				"level": "DEBUG",
+				"formatter": "risk_matrix_formatter",
+				"stream": "ext://sys.stdout"
+			}
+		},
+		"loggers": {
+			"risk_matrix_log": {
+				"level": "DEBUG",
+				"handlers": [
+					"consolehandler"
+				],
+				"qualname": "CQF",
+				"propagate": "no"
+			}
+		}
+	}
+}

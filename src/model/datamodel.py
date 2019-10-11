@@ -7,7 +7,7 @@ import pandas as pd
 from service.file import FileManager
 from contract.functions import DateFunctions, ContractSpecification
 from pricing.dataframemodel import NormalEuroOption
-
+import logging
 #global
 pd.options.display.float_format = '{:2,.6f}'.format
 
@@ -15,6 +15,7 @@ class DataModel:
     
     def __init__(self):
         self.model = FileManager.get_csv_data()
+        self._logger = logging.getLogger("risk_matrix_log")
     
     def add_model_param(self, param, function, args=None):
         if args is None:

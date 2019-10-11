@@ -131,8 +131,8 @@
 			"euribor": 25
 		},
 		"multiplier": {
-			"sterling": 1000,
-			"euribor": 1000
+			"sterling": 100,
+			"euribor": 100
 		}
 	}
 }
