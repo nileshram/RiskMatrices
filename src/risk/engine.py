@@ -145,6 +145,12 @@ class RiskEngine:
         self.plot_heatmap(portfolio_matrix)
 #         self.write_to_excel(portfolio_matrix)
 
+    def run_pricing_and_risk(self, product=None, scenario=None):
+        opt_matrix = self._run_options_pricing()
+        fut_matrix = self._run_futures_pricing()
+        portfolio_matrix = opt_matrix + fut_matrix
+        # Plot portfolio matrix
+        return portfolio_matrix
 
     def _run_options_pricing(self):
         sum_matrix = 0
