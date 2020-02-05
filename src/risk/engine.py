@@ -7,6 +7,7 @@ import numpy as np
 from pricing.dataframemodel import NormalEuroOption
 from model.datamodel import OptionsModel, FuturesModel
 from configuration import ConfigurationFactory
+from model.db import DatabaseManager
 import matplotlib.pyplot as plt
 import matplotlib.colors as mplc
 import pandas as pd
@@ -16,18 +17,20 @@ class RiskModel:
     
     def __init__(self):
         self.size = 11
-        self._init_config()
+        self._init_risk_config()
+        #init model
         self._init_fut_model()
         self._init_opt_model()
         self._logger = logging.getLogger("risk_matrix_log")
         
         # Add model shocks
-        self.add_model_shocks(self.config, "ECB", "euribor")
+        self.add_model_shocks(self.risk_config, "ECB", "euribor")
         # Initialise parameters
         self.add_model_config_params()
         
-    def _init_config(self):
-        self.config = ConfigurationFactory.create_config()
+    def _init_risk_config(self):
+        self.risk_config = ConfigurationFactory.create_config(name="RISK")
+        self._db_config = ConfigurationFactory.create_config(name="LOG")
     
     def _init_fut_model(self):
         self.fut_model = FuturesModel()
@@ -37,17 +40,17 @@ class RiskModel:
     
     def add_model_config_params(self):
         self.fut_model.add_config_contract_spec("Multiplier", "multiplier",
-                                                self.config)
+                                                self.risk_config)
         self.fut_model.add_config_contract_spec("TickValue", "tick_value",
-                                                self.config)
+                                                self.risk_config)
         self.shock_model.add_config_contract_spec("Multiplier", "multiplier",
-                                                self.config)
+                                                self.risk_config)
         self.shock_model.add_config_contract_spec("TickValue", "tick_value",
-                                                self.config)
+                                                self.risk_config)
         self.shock_model.fut_model.add_config_contract_spec("TickValue", "tick_value",
-                                                self.config)
+                                                self.risk_config)
         self.shock_model.fut_model.add_config_contract_spec("Multiplier", "multiplier",
-                                                self.config)
+                                                self.risk_config)
         
     def add_model_shocks(self, config, scenario, product):
         self.shock_model = self.opt_model
@@ -73,8 +76,9 @@ class RiskModel:
         tick_value = df_r["TickValue"]
         contract_name = df_r["ContractName"]
         # Compute option matrix here
-        new_theo_array = NormalEuroOption.array_pricer(strike=K, time_to_expiry=time, rate=r, opt_type=contract_type,
-                                                  fut_arr=fut_arr, vol_arr=vol_arr, c_name=contract_name)
+        new_theo_array = NormalEuroOption.array_pricer(strike=K, time_to_expiry=time, 
+                                                       rate=r, opt_type=contract_type,
+                                                       fut_arr=fut_arr, vol_arr=vol_arr, c_name=contract_name)
         # Compute option P&L here:
         pl = (new_theo_array - theo) * pos * tick_value * 100
         return pl
@@ -136,6 +140,7 @@ class RiskEngine:
     def __init__(self):
         self.risk_matrix = RiskModel()
         self._logger = logging.getLogger("risk_matrix_log")
+
     
     def run_pricing(self):
         opt_matrix = self._run_options_pricing()

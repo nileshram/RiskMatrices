@@ -26,5 +26,13 @@
 				"propagate": "no"
 			}
 		}
+	},
+	"db": {
+		"dbms": "mssql",
+		"connector": "pymssql",
+		"host": "192.168.118.50\\SQLEXPRESS",
+		"db_name": "Act-Arc",
+		"su_user": "sa",
+		"su_password": "atlantic,1"
 	}
 }

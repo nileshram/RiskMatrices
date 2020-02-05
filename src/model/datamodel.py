@@ -6,6 +6,8 @@ Created on 24 Jul 2019
 import pandas as pd
 from service.file import FileManager
 from contract.functions import DateFunctions, ContractSpecification
+from configuration import ConfigurationFactory
+from model.db import DatabaseManager
 from pricing.dataframemodel import NormalEuroOption
 import logging
 #global
@@ -14,9 +16,15 @@ pd.options.display.float_format = '{:2,.6f}'.format
 class DataModel:
     
     def __init__(self):
-        self.model = FileManager.get_csv_data()
+        self._init_config()
+        self._db = DatabaseManager(self._db_config["db"])
+        self.model = self._db.data
+        #self.model = FileManager.get_csv_data()
         self._logger = logging.getLogger("risk_matrix_log")
     
+    def _init_config(self):
+        self._db_config = ConfigurationFactory.create_config(name="LOG")
+        
     def add_model_param(self, param, function, args=None):
         if args is None:
             self.model[param] = self.model.apply(lambda x: function(x), axis=1)
