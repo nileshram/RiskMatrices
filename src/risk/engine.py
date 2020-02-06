@@ -27,7 +27,8 @@ class RiskModel:
         self.add_model_shocks(self.risk_config, "ECB", "euribor")
         # Initialise parameters
         self.add_model_config_params()
-        
+
+    
     def _init_risk_config(self):
         self.risk_config = ConfigurationFactory.create_config(name="RISK")
         self._db_config = ConfigurationFactory.create_config(name="LOG")
@@ -140,7 +141,10 @@ class RiskEngine:
     def __init__(self):
         self.risk_matrix = RiskModel()
         self._logger = logging.getLogger("risk_matrix_log")
-    
+        self._init_models()
+#         self._run_option_model_pricing() # computes options pl per curve segment
+#         self._run_futures_model_pricing() # computes futs pl per curve segment
+        
     def run_pricing(self):
         opt_matrix = self._run_options_pricing()
         fut_matrix = self._run_futures_pricing()
@@ -166,6 +170,46 @@ class RiskEngine:
             self._logger.info("{}) Computed risk matrix for {}".format(idx, opt["ContractName"]))
             sum_matrix += matrix
         return sum_matrix
+    
+    def _init_models(self):
+        self._models = {"w" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "whites"],
+                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "whites"]},
+                            "m" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "mids"],
+                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "mids"]},
+                            "g" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "greens"],
+                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "greens"]},
+                            "b" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "blues"],
+                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "blues"]},
+                            "all" : {"opt" : self.risk_matrix.shock_model.model,
+                                   "fut" : self.risk_matrix.shock_model.fut_model.model}
+                            }
+        
+    def _run_option_model_pricing(self):
+        for curve_segment in self._models:
+            model = self._models[curve_segment]["opt"]
+            sum_matrix = 0
+            for idx, opt in model.iterrows():
+                x_range = self.risk_matrix.create_fut_range(opt, self.risk_matrix.size)
+                y_range = self.risk_matrix.create_vol_range(opt, self.risk_matrix.size)
+                xx, yy = self.risk_matrix.create_fut_and_vol_matrix(x_range, y_range)
+                matrix = self.risk_matrix.compute_opt_pl(xx, yy, opt)
+                self._logger.info("{}) Computed risk matrix for {}".format(idx, opt["ContractName"]))
+                sum_matrix += matrix
+            self._models[curve_segment]["opt"] = sum_matrix
+
+    def _run_futures_model_pricing(self):
+        for curve_segment in self._models:
+            model = self._models[curve_segment]["fut"]
+            sum_matrix = 0
+            for idx, fut in model.iterrows():
+                x_range = self.risk_matrix.create_fut_range(fut, self.risk_matrix.size)
+                y_range = self.risk_matrix.create_vol_range(fut, self.risk_matrix.size)
+                xx, yy = self.risk_matrix.create_fut_and_vol_matrix(x_range, y_range)
+                matrix = self.risk_matrix.compute_fut_pl(xx, yy, fut)
+                self._logger.info("{}) Computed risk matrix for {}".format(idx, fut["ContractName"]))
+                sum_matrix += matrix
+            self._models[curve_segment]["fut"] = sum_matrix
+
     
     def _run_futures_pricing(self):
         sum_matrix = 0

@@ -91,6 +91,7 @@ class FuturesModel(DataModel):
         self.add_model_param("FutureContract", ContractSpecification.add_future_contract_name)
         self.add_model_param("ProductName", ContractSpecification.add_product)
         self.add_model_param("ExpiryIndex", ContractSpecification.add_fut_expiries)
+        self.add_model_param("CurveSegment", ContractSpecification.add_curve_segment)
          
 class OptionsModel(DataModel):
     
@@ -139,7 +140,8 @@ class OptionsModel(DataModel):
                                                                 "UnderlyingFutureYY",
                                                                 "FutureContract",
                                                                 "ExpiryIndex", 
-                                                                "FuturesPrice"]],
+                                                                "FuturesPrice",
+                                                                "CurveSegment"]], #this was added 06022020
                                                                 on=["UnderlyingFutureMonthCode",
                                                                 "UnderlyingFuturePCC", 
                                                                 "UnderlyingFutureYY"],

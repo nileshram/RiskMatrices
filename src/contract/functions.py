@@ -201,3 +201,13 @@ class ContractSpecification:
     def add_multiplier(df_r):
         if df_r["Product"] in ["Option", "Future"]:
             return 1000
+    
+    @staticmethod
+    def add_curve_segment(df_r):
+        _curve = {"whites" : ["ex1", "ex2", "ex3", "ex4"],
+                 "mids" : ["ex5", "ex6", "ex7", "ex8"],
+                 "greens" : ["ex9", "ex10", "ex11", "ex12"],
+                "blues" : ["ex13", "ex14", "ex15", "ex16"]}
+        for segment in _curve:
+            if df_r["ExpiryIndex"] in _curve[segment]:
+                return segment
