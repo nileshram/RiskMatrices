@@ -142,8 +142,8 @@ class RiskEngine:
         self.risk_matrix = RiskModel()
         self._logger = logging.getLogger("risk_matrix_log")
         self._init_models()
-#         self._run_option_model_pricing() # computes options pl per curve segment
-#         self._run_futures_model_pricing() # computes futs pl per curve segment
+        self._run_option_model_pricing() # computes options pl per curve segment
+        self._run_futures_model_pricing() # computes futs pl per curve segment
         
     def run_pricing(self):
         opt_matrix = self._run_options_pricing()
@@ -203,10 +203,10 @@ class RiskEngine:
             sum_matrix = 0
             for idx, fut in model.iterrows():
                 x_range = self.risk_matrix.create_fut_range(fut, self.risk_matrix.size)
-                y_range = self.risk_matrix.create_vol_range(fut, self.risk_matrix.size)
+                y_range = self.risk_matrix.create_vol_range(0, self.risk_matrix.size)
                 xx, yy = self.risk_matrix.create_fut_and_vol_matrix(x_range, y_range)
                 matrix = self.risk_matrix.compute_fut_pl(xx, yy, fut)
-                self._logger.info("{}) Computed risk matrix for {}".format(idx, fut["ContractName"]))
+                self._logger.info("{}) Computed risk matrix for {}".format(idx, fut["FutureContract"]))
                 sum_matrix += matrix
             self._models[curve_segment]["fut"] = sum_matrix
 
