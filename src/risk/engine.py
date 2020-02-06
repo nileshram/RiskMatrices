@@ -140,7 +140,6 @@ class RiskEngine:
     def __init__(self):
         self.risk_matrix = RiskModel()
         self._logger = logging.getLogger("risk_matrix_log")
-
     
     def run_pricing(self):
         opt_matrix = self._run_options_pricing()
