@@ -24,7 +24,7 @@ class RiskModel:
         self._logger = logging.getLogger("risk_matrix_log")
         
         # Add model shocks
-        self.add_model_shocks(self.risk_config, "ECB", "euribor")
+        self.add_model_shocks(config=self.risk_config, product="euribor", scenario="ECB")
         # Initialise parameters
         self.add_model_config_params()
 
@@ -53,7 +53,7 @@ class RiskModel:
         self.shock_model.fut_model.add_config_contract_spec("Multiplier", "multiplier",
                                                 self.risk_config)
         
-    def add_model_shocks(self, config, scenario, product):
+    def add_model_shocks(self, config=None, product=None, scenario=None):
         self.shock_model = self.opt_model
         # Drop the unused expiries
         self._logger.info("missing data {}".format(self.shock_model.model[self.shock_model.model.isnull().any(axis=1)]))
