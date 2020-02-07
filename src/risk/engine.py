@@ -7,6 +7,7 @@ import numpy as np
 from pricing.dataframemodel import NormalEuroOption
 from model.datamodel import OptionsModel, FuturesModel
 from configuration import ConfigurationFactory
+from datetime import datetime, time, timedelta
 from model.db import DatabaseManager
 import matplotlib.pyplot as plt
 import matplotlib.colors as mplc
@@ -144,10 +145,20 @@ class RiskEngine:
         self._init_models()
         self._run_option_model_pricing() # computes options pl per curve segment
         self._run_futures_model_pricing() # computes futs pl per curve segment
+        self._sum_futures_and_options_risk() # computes the combined pl risk from options and futures
         
+    def _sum_futures_and_options_risk(self):
+        for curve_segment in self._models:
+            self._models[curve_segment]["summary"] = self._models[curve_segment]["opt"] + self._models[curve_segment]["fut"]
+    
     def run_pricing(self):
+        start_time = datetime.now()
         opt_matrix = self._run_options_pricing()
         fut_matrix = self._run_futures_pricing()
+        end_time = datetime.now()
+        #compute elapsed time here
+        elapsed_time = end_time - start_time
+        self._logger.info("Elapsed time - Seconds: {}, Microseconds: {}".format(elapsed_time.seconds, elapsed_time.microseconds))
         portfolio_matrix = opt_matrix + fut_matrix
         # Plot portfolio matrix
         self.plot_heatmap(portfolio_matrix)
@@ -185,6 +196,7 @@ class RiskEngine:
                             }
         
     def _run_option_model_pricing(self):
+        self._logger.info("Initialising option model pricing")
         for curve_segment in self._models:
             model = self._models[curve_segment]["opt"]
             sum_matrix = 0
@@ -198,6 +210,7 @@ class RiskEngine:
             self._models[curve_segment]["opt"] = sum_matrix
 
     def _run_futures_model_pricing(self):
+        self._logger.info("Initialising futures model pricing")
         for curve_segment in self._models:
             model = self._models[curve_segment]["fut"]
             sum_matrix = 0
