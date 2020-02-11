@@ -5,8 +5,11 @@ Date of Creation : 22 Jul 2019
 Author : nish
 
 """
+from os import path
+from os.path import dirname
 
-RISK = "/home/nish/workspace/RiskMatrices/docs/ice_result_set.csv"
-CONFIG = "/home/nish/workspace/RiskMatrices/conf/config.json"
-LOG = "/home/nish/workspace/RiskMatrices/conf/log_config.json"
-SQL = "/home/nish/workspace/RiskMatrices/sql/short_end_portfolio_data.sql"
+PROJECT_BASE = dirname(dirname(dirname(__file__)))
+RISK = path.join(PROJECT_BASE, "docs", "ice_result_set.csv")
+CONFIG = path.join(PROJECT_BASE, "conf", "config.json")
+LOG = path.join(PROJECT_BASE, "conf", "log_config.json")
+SQL = path.join(PROJECT_BASE, "sql", "short_end_portfolio_data.sql")

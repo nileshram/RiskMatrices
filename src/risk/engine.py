@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mplc
 import pandas as pd
 import logging
+from graph.graphlib import GraphEngine
 
 class RiskModel:
     
@@ -160,9 +161,8 @@ class RiskEngine:
         elapsed_time = end_time - start_time
         self._logger.info("Elapsed time - Seconds: {}, Microseconds: {}".format(elapsed_time.seconds, elapsed_time.microseconds))
         portfolio_matrix = opt_matrix + fut_matrix
-        # Plot portfolio matrix
-        self.plot_heatmap(portfolio_matrix)
-#         self.write_to_excel(portfolio_matrix)
+        #store matrix as 
+        self.portfolio_matrix = portfolio_matrix
 
     def run_pricing_and_risk(self, product=None, scenario=None):
         opt_matrix = self._run_options_pricing()
@@ -258,6 +258,8 @@ class RiskEngine:
         ax.set_title("P&L Portfolio Heatmap ('000s)")
         fig.tight_layout()
         plt.colorbar(im)
+        #increase figure size here
+        plt.figure(figsize=(20,10))
         plt.show()
     
     def write_to_excel(self, array):
