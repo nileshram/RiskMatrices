@@ -16,7 +16,7 @@ import logging
 
 class RiskModel:
     
-    def __init__(self):
+    def __init__(self, product=None, scenario=None):
         self.size = 11
         self._init_risk_config()
         #init model
@@ -25,7 +25,7 @@ class RiskModel:
         self._logger = logging.getLogger("risk_matrix_log")
         
         # Add model shocks
-        self.add_model_shocks(config=self.risk_config, product="euribor", scenario="ECB")
+        self.add_model_shocks(config=self.risk_config, product=product, scenario=scenario)
         # Initialise parameters
         self.add_model_config_params()
 
@@ -139,8 +139,8 @@ class RiskModel:
 
 class RiskEngine:
     
-    def __init__(self):
-        self.risk_matrix = RiskModel()
+    def __init__(self, scenario=None, product=None):
+        self.risk_matrix = RiskModel(product=product, scenario=scenario)
         self._logger = logging.getLogger("risk_matrix_log")
         self._init_models()
         self._run_option_model_pricing() # computes options pl per curve segment

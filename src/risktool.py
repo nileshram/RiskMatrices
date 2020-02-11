@@ -18,6 +18,7 @@ def _configure_log():
         logging.config.dictConfig(config["log"])
     else:
         logging.basicConfig(level=logging.INFO)
+    
 
 if __name__ == "__main__":
     _configure_log()
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     log.info("Initialising Program For Risk Matrix Computation")
     
     try:
-        risk_engine = RiskEngine()
+        risk_engine = RiskEngine(product="sterling", scenario="BOE")
         risk_engine.run_pricing()
     except Exception as e:
         print(e)
