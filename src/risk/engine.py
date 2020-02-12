@@ -144,44 +144,7 @@ class RiskEngine:
         self.risk_matrix = RiskModel(product=product, scenario=scenario)
         self._logger = logging.getLogger("risk_matrix_log")
         self._init_models()
-        self._run_option_model_pricing() # computes options pl per curve segment
-        self._run_futures_model_pricing() # computes futs pl per curve segment
-        self._sum_futures_and_options_risk() # computes the combined pl risk from options and futures
-        
-    def _sum_futures_and_options_risk(self):
-        for curve_segment in self._models:
-            self._models[curve_segment]["summary"] = self._models[curve_segment]["opt"] + self._models[curve_segment]["fut"]
-    
-    def run_pricing(self):
-        start_time = datetime.now()
-        opt_matrix = self._run_options_pricing()
-        fut_matrix = self._run_futures_pricing()
-        end_time = datetime.now()
-        #compute elapsed time here
-        elapsed_time = end_time - start_time
-        self._logger.info("Elapsed time - Seconds: {}, Microseconds: {}".format(elapsed_time.seconds, elapsed_time.microseconds))
-        portfolio_matrix = opt_matrix + fut_matrix
-        #store matrix as 
-        self.portfolio_matrix = portfolio_matrix
 
-    def run_pricing_and_risk(self, product=None, scenario=None):
-        opt_matrix = self._run_options_pricing()
-        fut_matrix = self._run_futures_pricing()
-        portfolio_matrix = opt_matrix + fut_matrix
-        # Plot portfolio matrix
-        return portfolio_matrix
-
-    def _run_options_pricing(self):
-        sum_matrix = 0
-        for idx, opt in self.risk_matrix.shock_model.model.iterrows():
-            x_range = self.risk_matrix.create_fut_range(opt, self.risk_matrix.size)
-            y_range = self.risk_matrix.create_vol_range(opt, self.risk_matrix.size)
-            xx, yy = self.risk_matrix.create_fut_and_vol_matrix(x_range, y_range)
-            matrix = self.risk_matrix.compute_opt_pl(xx, yy, opt)
-            self._logger.info("{}) Computed risk matrix for {}".format(idx, opt["ContractName"]))
-            sum_matrix += matrix
-        return sum_matrix
-    
     def _init_models(self):
         self._models = {"w" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "whites"],
                                    "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "whites"]},
@@ -195,6 +158,19 @@ class RiskEngine:
                                    "fut" : self.risk_matrix.shock_model.fut_model.model}
                             }
         
+
+    def run_pricing_and_risk(self):
+        start_time = datetime.now()
+        self._run_option_model_pricing() # computes options pl per curve segment
+        self._run_futures_model_pricing() # computes futs pl per curve segment
+        self._sum_futures_and_options_risk() # computes the combined pl risk from options and futures
+        end_time = datetime.now()
+        #compute elapsed time here
+        elapsed_time = end_time - start_time
+        self._logger.info("Elapsed time - Seconds: {}, Microseconds: {}".format(elapsed_time.seconds, elapsed_time.microseconds))
+        #generate graph figures here
+        self._generate_heatplot()
+
     def _run_option_model_pricing(self):
         self._logger.info("Initialising option model pricing")
         for curve_segment in self._models:
@@ -223,45 +199,14 @@ class RiskEngine:
                 sum_matrix += matrix
             self._models[curve_segment]["fut"] = sum_matrix
 
-    
-    def _run_futures_pricing(self):
-        sum_matrix = 0
-        for idx, fut in self.risk_matrix.shock_model.fut_model.model.iterrows():
-            x_range = self.risk_matrix.create_fut_range(fut, self.risk_matrix.size)
-            y_range = self.risk_matrix.create_vol_range(0, self.risk_matrix.size)
-            xx, yy = self.risk_matrix.create_fut_and_vol_matrix(x_range, y_range)
-            matrix = self.risk_matrix.compute_fut_pl(xx, yy, fut)
-            sum_matrix += matrix
-        return sum_matrix
+    def _sum_futures_and_options_risk(self):
+        for curve_segment in self._models:
+            self._models[curve_segment]["summary"] = self._models[curve_segment]["opt"] + self._models[curve_segment]["fut"]
 
-    def plot_heatmap(self, graph_model):
-        self.size = 12
-        fig, ax = plt.subplots()
-        cm = mplc.LinearSegmentedColormap.from_list("", ["red","white","green"])
-        im = ax.imshow(graph_model, cmap=cm)
-        
-        # Display all of the ticks
-        ax.set_xticks(np.arange(self.size))
-        ax.set_yticks(np.arange(self.size))
-        # Label each of the x/y tick labels
-        ax.set_xticklabels(["-", "-", "-", "-", "-", 0, 0, "+", "+", "+", "+", "+"])
-        ax.set_yticklabels(["-", "-", "-", "-", "-", 0, 0, "+", "+", "+", "+", "+"][::-1])
-        
-        ax.set_xlabel("Futures step")
-        ax.set_ylabel("Volatility")
-        # Loop over data dimensions and create text annotations.
-        for i in range(self.size):
-            for j in range(self.size):
-                text = ax.text(j, i, round(graph_model[i, j]/1000, 2),
-                               ha="center", va="center", color="black",
-                               size=8, fontweight='bold')
-        ax.set_title("P&L Portfolio Heatmap ('000s)")
-        fig.tight_layout()
-        plt.colorbar(im)
-        #increase figure size here
-        plt.figure(figsize=(20,10))
-        plt.show()
-    
+    def _generate_heatplot(self):
+        for curve_segment in self._models:
+            self._models[curve_segment]["graph"] = GraphEngine().plot_heatmap(self._models[curve_segment]["summary"])
+            
     def write_to_excel(self, array):
         temp_arr = np.array(array)
         df = pd.DataFrame(temp_arr)

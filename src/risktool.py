@@ -27,6 +27,6 @@ if __name__ == "__main__":
     
     try:
         risk_engine = RiskEngine(product="sterling", scenario="BOE")
-        risk_engine.run_pricing()
+        risk_engine.run_pricing_and_risk()
     except Exception as e:
         print(e)
