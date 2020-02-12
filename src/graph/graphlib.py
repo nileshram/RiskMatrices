@@ -21,7 +21,12 @@ class GraphEngine:
         vmin = vals.min()
         vmax = vals.max()
         norm = MidpointNormalize(vmin=vmin, vmax=vmax, midpoint=0)
-        im = self.ax.imshow(graph_model, cmap=cm, norm=norm)
+        
+        #attempt to plot image
+        try:
+            im = self.ax.imshow(graph_model, cmap=cm, norm=norm)
+        except TypeError:
+            return None
         
         # Display all of the ticks
         self.ax.set_xticks(np.arange(self.size))
