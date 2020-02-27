@@ -24,7 +24,7 @@ def _configure_log():
 if __name__ == "__main__":
     _configure_log()
     log = logging.getLogger("risk_matrix_log")
-    log.info("Initialising Program For Risk Matrix Computation")
+    log.info("Initialising Kernel For Risk Matrix Computation")
     try:
         IPKernelApp.launch_instance(kernel_class=RiskComputationKernel)
     except Exception as e:
