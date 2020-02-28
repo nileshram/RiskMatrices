@@ -6,7 +6,6 @@ Created on 27 Feb 2020
 from ipykernel.kernelbase import Kernel
 from risk.engine import RiskEngine
 from kernel.handler import StreamHandler
-from cherrypy import response
 
 class RiskComputationKernel(Kernel):
     implementation = 'Risk Computation'
@@ -42,4 +41,11 @@ class RiskComputationKernel(Kernel):
             error_message = self.stream_handler.create_error_message(code)
             self.send_response(self.iopub_socket, 'stream', error_message)
         return response
+
+    def do_shutdown(self, restart):
+        del self.risk_engine
+        del self.stream_handler
+        self.shell.exit_now = True
+        return dict(status='ok', restart=restart)
+
             
