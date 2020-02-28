@@ -5,6 +5,8 @@ Created on 27 Feb 2020
 '''
 from ipykernel.kernelbase import Kernel
 from risk.engine import RiskEngine
+from kernel.handler import StreamHandler
+from cherrypy import response
 
 class RiskComputationKernel(Kernel):
     implementation = 'Risk Computation'
@@ -21,30 +23,23 @@ class RiskComputationKernel(Kernel):
     def __init__(self, **kwargs):
         super(RiskComputationKernel, self).__init__(**kwargs)
         self.risk_engine = RiskEngine(product="sterling", scenario="BOE")
+        self.stream_handler = StreamHandler()
 
     def do_execute(self, code, silent, store_history=True, user_expressions=None, allow_stdin=False):
         if not silent:
-            message = self._perform_check(code)
-            stream_content = {'name': 'stdout', 'text': message}
+            stream_content = self.stream_handler.create_ack(code)
             self.send_response(self.iopub_socket, 'stream', stream_content)
         
         #perform execution here
-        request = "".join(("self.risk_engine", ".", code, "()"))
-        exec(request)
-        reply_stream_content = {'name':'stdout', 'text':"Request Executed"}
-        self.send_response(self.iopub_socket, 'stream', reply_stream_content)
-        return {'status': 'ok',
-                # The base class increments the execution count
-                'execution_count': self.execution_count,
-                'payload': [],
-                'user_expressions': {},
-               }
-    
-    def _perform_check(self, code):
         if hasattr(self.risk_engine, code):
-            message = "Sending request: {} to be executed on Kernel".format(code)
+            request = "".join(("self.risk_engine", ".", code, "()"))
+            exec(request)
+            response = self.stream_handler.generate_ok_response(self.execution_count)
+            success_message = self.stream_handler.create_success_message(code)
+            self.send_response(self.iopub_socket, 'stream', success_message)
         else:
-            raise AttributeError("Risk Kernel does not support the following method")
-            message = "Risk Kernel does not support the following method: {}".format(code)
-        return message
+            response = self.stream_handler.generate_error_response(self.execution_count)
+            error_message = self.stream_handler.create_error_message(code)
+            self.send_response(self.iopub_socket, 'stream', error_message)
+        return response
             

@@ -20,7 +20,6 @@ def _configure_log():
     else:
         logging.basicConfig(level=logging.INFO)
     
-
 if __name__ == "__main__":
     _configure_log()
     log = logging.getLogger("risk_matrix_log")
