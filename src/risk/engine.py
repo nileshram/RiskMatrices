@@ -143,7 +143,7 @@ class RiskEngine:
     def __init__(self, scenario=None, product=None):
         self.risk_matrix = RiskModel(product=product, scenario=scenario)
         self._logger = logging.getLogger("risk_matrix_log")
-        self._init_models()
+#         self._init_models()
 
     def _init_models(self):
         self._models = {"w" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "whites"],
@@ -160,6 +160,7 @@ class RiskEngine:
         
 
     def run_pricing_and_risk(self):
+        self._init_models()
         start_time = datetime.now()
         self._run_option_model_pricing() # computes options pl per curve segment
         self._run_futures_model_pricing() # computes futs pl per curve segment
