@@ -31,6 +31,8 @@ class RiskComputationKernel(Kernel):
         #perform execution here
         request = "".join(("self.risk_engine", ".", code, "()"))
         exec(request)
+        reply_stream_content = {'name':'stdout', 'text':"Request Executed"}
+        self.send_response(self.iopub_socket, 'stream', reply_stream_content)
         return {'status': 'ok',
                 # The base class increments the execution count
                 'execution_count': self.execution_count,

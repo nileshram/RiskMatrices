@@ -6,6 +6,8 @@ Created on 11 Feb 2020
 
 import matplotlib.colors as mplc
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 from graph.graph_properties import MidpointNormalize
 
