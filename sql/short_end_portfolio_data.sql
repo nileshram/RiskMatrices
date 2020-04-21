@@ -3,5 +3,6 @@ calc.Theta, calc.Vega, calc.ImpliedVolatility, calc.ActualVolatility, calc.TimeT
 from Abn.dbo.Contracts as con
 left outer join Abn.dbo.Positions as pos on pos.FkContractId = con.Id
 left outer join [Act-Arc].dbo.Calculations as calc on con.Id = calc.FkContractId
-where pos.[Position] is not null and calc.Theo is not null
+left outer join Abn.dbo.Accounts as acc on pos.FkAccountId=acc.Id
+where pos.[Position] is not null and calc.Theo is not null and acc.FullAccountName = 'GBP_MM_FRONT_TUCO'
 order by con.ExpirationDate desc;
