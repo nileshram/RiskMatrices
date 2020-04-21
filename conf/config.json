@@ -3,7 +3,7 @@
 		"euribor": {
 			"shocks": {
 				"scenario": {
-					"ECB": {
+					"Corona": {
 						"fut": {
 							"up": {
 								"ex1": 0.25,
@@ -87,7 +87,7 @@
 		"sterling": {
 			"shocks": {
 				"scenario": {
-					"BOE": {
+					"Corona": {
 						"fut": {
 							"up": {
 								"ex1": 0.01,
