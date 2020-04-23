@@ -18,7 +18,10 @@ from graph.graphlib import GraphEngine
 class RiskModel:
     
     def __init__(self, product=None, scenario=None):
-        self.size = 11
+        #commented for new size
+        #note that the size here has to be n + 1 in self.size in the graphlib
+        #self.size = 11
+        self.size = 6
         self._init_risk_config()
         #init model
         self._init_fut_model()
@@ -29,6 +32,9 @@ class RiskModel:
         self.add_model_shocks(config=self.risk_config, product=product, scenario=scenario)
         # Initialise parameters
         self.add_model_config_params()
+        #dump model to excel for analysis
+#         self.fut_model.model.to_excel("{} - {}.xlsx".format(product, scenario))
+#         self.opt_model.model.to_excel("{} - {}.xlsx".format(product, scenario))
 
     
     def _init_risk_config(self):
@@ -101,13 +107,13 @@ class RiskModel:
         size_adj = np.around(size / 2) #here we take half the size
         current_fut_level = opt["FuturesPrice"] #this is form mid point of the range
         upper_fut_level = opt["FuturesPrice"] + opt["fut_shock_upper"]
-        return np.linspace(current_fut_level, upper_fut_level, size_adj)
+        return np.linspace(current_fut_level, upper_fut_level, int(size_adj))
     
     def _create_lower_fut_range(self, opt, size):
         size_adj = np.around(size / 2)
         current_fut_level = opt["FuturesPrice"]
         lower_fut_level = opt["FuturesPrice"] + opt["fut_shock_lower"] 
-        return np.linspace(lower_fut_level, current_fut_level, size_adj)
+        return np.linspace(lower_fut_level, current_fut_level, int(size_adj))
     
     # Create the volatility range
     def create_vol_range(self, opt, size):
@@ -120,18 +126,18 @@ class RiskModel:
         try:
             current_vol_level = opt["ActualVolatility"]
         except TypeError:
-            return np.linspace(0, 0, size_adj)
+            return np.linspace(0, 0, int(size_adj))
         upper_vol_level = (1 + opt["vol_shock_upper"]) * opt["ActualVolatility"] 
-        return np.linspace(current_vol_level, upper_vol_level, size_adj)
+        return np.linspace(current_vol_level, upper_vol_level, int(size_adj))
     
     def _create_lower_vol_range(self, opt, size):
         size_adj = np.around(size / 2)
         try:
             current_vol_level = opt["ActualVolatility"]
         except TypeError:
-            return np.linspace(0, 0, size_adj)
+            return np.linspace(0, 0, int(size_adj))
         lower_vol_level = (1 + opt["vol_shock_lower"]) * opt["ActualVolatility"] 
-        return np.linspace(lower_vol_level, current_vol_level, size_adj)
+        return np.linspace(lower_vol_level, current_vol_level, int(size_adj))
     
     # Output the futures and volatility matrix
     def create_fut_and_vol_matrix(self, fut_range, vol_range):
