@@ -38,7 +38,7 @@ class GraphEngine:
         self.ax.set_yticks(np.arange(self.size))
         # Label each of the x/y tick labels
         self.ax.set_xticklabels(["-", "-", 0, 0, "+", "+"])
-        self.ax.set_yticklabels(["-", "-", 0, 0, "+", "+"][::-1])
+        self.ax.set_yticklabels(["-", "-", 0, 0, "+", "+"]) #PLEASE CHECK [::-1]
         
 #         #12 bucket size
 #         self.ax.set_xticklabels(["-", "-", "-", "-", "-", 0, 0, "+", "+", "+", "+", "+"])
