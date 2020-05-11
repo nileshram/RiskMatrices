@@ -4,7 +4,7 @@ Created on 24 Jul 2019
 @author: nish
 '''
 import numpy as np
-from pricing.dataframemodel import NormalEuroOption
+from pricing.dataframemodel import NormalEuroOption, FuturesPricer
 from model.datamodel import OptionsModel, FuturesModel
 from configuration import ConfigurationFactory
 from datetime import datetime, time, timedelta
@@ -32,6 +32,23 @@ class RiskModel:
         self.add_model_shocks(config=self.risk_config, product=product, scenario=scenario)
         # Initialise parameters
         self.add_model_config_params()
+        
+        #Price up the shock model with adj. shocks
+        ##Option shocks
+        self.compute_opt_shock(fut_direction="upper", vol_direction="lower")
+        self.compute_opt_shock(fut_direction="lower", vol_direction="upper")
+        self.compute_opt_shock(fut_direction="upper", vol_direction="upper")
+        self.compute_opt_shock(fut_direction="lower", vol_direction="lower")
+        ##Futures shocks
+        self.compute_fut_shock(fut_direction="upper", vol_direction="lower")
+        self.compute_fut_shock(fut_direction="lower", vol_direction="upper")
+        self.compute_fut_shock(fut_direction="upper", vol_direction="upper")
+        self.compute_fut_shock(fut_direction="lower", vol_direction="lower")
+        
+        #Dump the shocks to excel        
+        self.shock_model.model.to_excel("opt_shocks_summary.xlsx")
+        self.shock_model.fut_model.model.to_excel("fut_shocks_summary.xlsx")
+        
         #dump model to excel for analysis
 #         self.fut_model.model.to_excel("{} - {}.xlsx".format(product, scenario))
 #         self.opt_model.model.to_excel("{} - {}.xlsx".format(product, scenario))
@@ -91,6 +108,15 @@ class RiskModel:
         # Compute option P&L here:
         pl = (new_theo_array - theo) * pos * tick_value * 100
         return pl
+
+    def compute_opt_shock(self, fut_direction=None, vol_direction=None):
+        self.shock_model.add_model_param("fut_{}_vol_{}_shock".format(fut_direction, vol_direction), NormalEuroOption.shock_pricer_generic,
+                                   args=(fut_direction, vol_direction))
+
+
+    def compute_fut_shock(self, fut_direction=None, vol_direction=None):
+        self.shock_model.fut_model.add_model_param("fut_{}_vol_{}_shock".format(fut_direction, vol_direction), FuturesPricer.shock_pricer_generic,
+                                   args=(fut_direction, vol_direction))
         
     # Compute the futures P&L
     def compute_fut_pl(self, fut_arr, vol_arr, df_r):
@@ -154,14 +180,14 @@ class RiskEngine:
     def _init_models(self):
         self._models = {"w" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "whites"],
                                    "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "whites"]},
-                            "m" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "mids"],
-                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "mids"]},
-                            "g" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "greens"],
-                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "greens"]},
-                            "b" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "blues"],
-                                   "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "blues"]},
-                            "all" : {"opt" : self.risk_matrix.shock_model.model,
-                                   "fut" : self.risk_matrix.shock_model.fut_model.model}
+                        "m" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "mids"],
+                               "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "mids"]},
+                        "g" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "greens"],
+                               "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "greens"]},
+                        "b" : {"opt" : self.risk_matrix.shock_model.model[self.risk_matrix.shock_model.model["CurveSegment"] == "blues"],
+                               "fut" : self.risk_matrix.shock_model.fut_model.model[self.risk_matrix.shock_model.fut_model.model["CurveSegment"] == "blues"]},
+                        "all" : {"opt" : self.risk_matrix.shock_model.model,
+                               "fut" : self.risk_matrix.shock_model.fut_model.model}
                             }
         
 
@@ -175,6 +201,9 @@ class RiskEngine:
         #compute elapsed time here
         elapsed_time = end_time - start_time
         self._logger.info("Elapsed time - Seconds: {}, Microseconds: {}".format(elapsed_time.seconds, elapsed_time.microseconds))
+
+        #generate excel
+#         self.gen_excel_output()
         #generate graph figures here
         self._generate_heatplot()
 
@@ -213,7 +242,28 @@ class RiskEngine:
     def _generate_heatplot(self):
         for curve_segment in self._models:
             self._models[curve_segment]["graph"] = GraphEngine().plot_heatmap(self._models[curve_segment]["summary"])
-            
+    
+    def gen_excel_output(self):
+        writer = pd.ExcelWriter('/home/nilesh/workspace/PortfolioRisk/pinnacle_shocks.xlsx', engine='xlsxwriter')
+        workbook= writer.book
+        
+        res = []
+        for c_seg in self._models:
+            summary = self._models[c_seg]["summary"]
+            #create the dataframe here
+            df = pd.DataFrame({'Column1': summary[:, 0], 'Column2' : summary[:, 1]})
+            df.name = c_seg
+            res.append(df)
+        worksheet = workbook.add_worksheet("euribor_shocks")
+#         writer.sheets("euribor_shocks") = worksheet
+        count = 0
+        for d in res:
+            count += 2
+            worksheet.write_string(0, 0, d)
+            d.to_excel(writer,sheet_name='euribor_shocks',startrow=1 + count , startcol=0)
+        writer.save()
+
+    
     def write_to_excel(self, array):
         temp_arr = np.array(array)
         df = pd.DataFrame(temp_arr)

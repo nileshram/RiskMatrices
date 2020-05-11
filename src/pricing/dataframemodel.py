@@ -121,6 +121,66 @@ class NormalEuroOption(DataFramePricingModel):
         else:
             print("Invalid option type specified please check if calls or puts")
         return bs
+
+    @staticmethod    
+    def shock_pricer_generic(df_r, fut_direction, vol_direction):
+        fut_price_shock = df_r["FuturesPrice"] + df_r["fut_shock_{}".format(fut_direction)]
+        vol_shock = df_r["ActualVolatility"] * (1 + df_r["vol_shock_{}".format(vol_direction)])
+        try:
+            d1 = (log(fut_price_shock / df_r["Strike"]) + (df_r["rate"] + (vol_shock**2)/2) * df_r["TimeToExpiry"]) / (vol_shock * sqrt(df_r["TimeToExpiry"]))
+            d2 = d1 - (vol_shock * sqrt(df_r["TimeToExpiry"]))
+        except ZeroDivisionError:
+            logger.info("Error computing option price for {}".format(df_r["ContractName"]))
+            return 0
+        if df_r["PutCall"] == "Call":
+            bs = (fut_price_shock * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
+        elif df_r["PutCall"] == "Put":
+            bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (fut_price_shock * norm.cdf(-d1))
+        else:
+            logger.info("N/A")
+        #Compute the p&l of the move here
+        pl = (bs - df_r["Theo"]) * df_r["Position"] * df_r["TickValue"] * df_r["Multiplier"]
+        return pl
+
+#     @staticmethod    
+#     def shock_pricer_upper(df_r):
+#         fut_price_upper = df_r["FuturesPrice"] + df_r["fut_shock_upper"]
+#         vol_upper = df_r["ActualVolatility"] * (1 + df_r["vol_shock_upper"])
+#         try:
+#             d1 = (log(fut_price_upper / df_r["Strike"]) + (df_r["rate"] + (vol_upper**2)/2) * df_r["TimeToExpiry"]) / (vol_upper * sqrt(df_r["TimeToExpiry"]))
+#             d2 = d1 - (vol_upper * sqrt(df_r["TimeToExpiry"]))
+#         except ZeroDivisionError:
+#             logger.info("Error computing option price for {}".format(df_r["ContractName"]))
+#             return 0
+#         if df_r["PutCall"] == "Call":
+#             bs = (fut_price_upper * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
+#         elif df_r["PutCall"] == "Put":
+#             bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (fut_price_upper * norm.cdf(-d1))
+#         else:
+#             logger.info("N/A")
+#         #Compute the p&l of the move here
+#         pl = (bs - df_r["Theo"]) * df_r["Position"] * df_r["TickValue"] * df_r["Multiplier"]
+#         return pl
+# 
+#     @staticmethod    
+#     def shock_pricer_lower(df_r):
+#         fut_price_lower = df_r["FuturesPrice"] + df_r["fut_shock_lower"]
+#         vol_lower = df_r["ActualVolatility"] * (1 + df_r["vol_shock_lower"])
+#         try:
+#             d1 = (log(fut_price_lower / df_r["Strike"]) + (df_r["rate"] + (vol_lower**2)/2) * df_r["TimeToExpiry"]) / (vol_lower * sqrt(df_r["TimeToExpiry"]))
+#             d2 = d1 - (vol_lower * sqrt(df_r["TimeToExpiry"]))
+#         except ZeroDivisionError:
+#             logger.info("Error computing option price for {}".format(df_r["ContractName"]))
+#             return 0
+#         if df_r["PutCall"] == "Call":
+#             bs = (fut_price_lower * norm.cdf(d1)) - (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(d2))
+#         elif df_r["PutCall"] == "Put":
+#             bs = (df_r["Strike"] * exp(-df_r["rate"] * df_r["TimeToExpiry"]) * norm.cdf(-d2)) - (fut_price_lower * norm.cdf(-d1))
+#         else:
+#             logger.info("N/A")
+#         #Compute the p&l of the move here
+#         pl = (bs - df_r["Theo"]) * df_r["Position"] * df_r["TickValue"] * df_r["Multiplier"]
+#         return pl
     
     @staticmethod
     def delta(df_r):
@@ -138,7 +198,19 @@ class NormalEuroOption(DataFramePricingModel):
     def theta(df_r):
         pass
 
-class OrcNEOModel(DataFramePricingModel):
-    pass
+class FuturesPricer(DataFramePricingModel):
+    
+    def __init__(self, df):
+        super(NormalEuroOption, self).__init__(df)
+        #Here we have the optionality to return an instance of the model
+        #But if we dont want this and only wish to compute greeks individually
+        #We call the static methods to compute prices
+    
+
+    @staticmethod    
+    def shock_pricer_generic(df_r, fut_direction, vol_direction):
+        fut_price_shock = df_r["fut_shock_{}".format(fut_direction)]
+        pl = (fut_price_shock) * df_r["Position"] * df_r["TickValue"] * df_r["Multiplier"]
+        return pl
 
 
